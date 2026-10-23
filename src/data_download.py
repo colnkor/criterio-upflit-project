@@ -1,9 +1,19 @@
+import os
+import pandas as pd
+from .config import config
+
+
 def data_download():
-  import os
-  import pandas as pd
+  file_path = config.get('data_path')
+  if os.path.exists(file_path):
+    print("Данные уже загружены")
+    return 1
 
   os.makedirs("data", exist_ok=True)
-  url = "https://huggingface.co/datasets/criteo/criteo-uplift/resolve/main/criteo-research-uplift-v2.1.csv.gz"
+
+  url = config.get('data_url')
+  if url is None:
+    raise ValueError('Нет ссылки на данные в конфиге (data_url)')
 
   dtypes = {
     'treatment': 'int8', 'exposure': 'int8', 
@@ -14,7 +24,6 @@ def data_download():
 
   df = pd.read_csv(url, compression='gzip', dtype=dtypes)
 
-  df.to_parquet('data/criteo-uplift.parquet', index=False)
+  df.to_parquet(file_path, index=False)
 
-
-data_download()
+  return 0
